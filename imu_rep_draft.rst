@@ -49,9 +49,6 @@ Raw Data
 
   - When the device is at rest, the vector will represent the deflection solely due to gravity, and will always point 'up' away from the earth's gravitational center.
 
-  - The direction of the vector in the neutral orientation will depend on the z-axis orientation of the IMU's world frame.
-
-
 * Gyroscopes
 
   - The gyroscopes report rotational velocity data in the body frame of the device. The data takes the form of a 3D vector, with the components representing velocity around each equivalent axis of the body frame.
