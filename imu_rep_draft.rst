@@ -19,13 +19,15 @@ Specification
 Frame Conventions
 ---------------
 
-An IMU device measures data with respect to two frames:
+An IMU device measures data with respect to two frames, specified by the manufacturer:
 
-* The **body frame** represents the internal device axes. These are typically specified by the manufacturer, and may be found either in the device specification documents, and sometimes printed directly on the device body. This frame is fixed to the device orientation.
+* The **world frame** represents the external reference frame for the device. This frame is typically aligned either ENU (east north up) or NED (north east down), and the relevant conventions from REP 103 [1]_ apply.
 
-* The **world frame** represents the external reference frame for the device. This frame is typically defined as ENU (east north up) or NED (north east down) by the device manufacturer, and the relevant conventions from REP 103 [1]_ apply.
+* The **body frame** represents the internal device axes. These may be found either in the device specification documents, and sometimes printed directly on the device body. This frame is fixed to the device orientation.
+  
+  - If the device does not have an absolute yaw reference (magnetometer), the world frame is only aligned with an external reference along the `z` axis. The `x` and `y` axes are aligned relative to the power-on position of the sensor.
 
-The device has an associated *neutral orientation*, defined as the orientation of the device where the body and the world frame align [2]_.
+  - The device has an associated *neutral orientation*, defined as the orientation of the device where the body and the world frame align [2]_.
 
 Data Reporting
 --------------
