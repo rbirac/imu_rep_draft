@@ -34,7 +34,9 @@ Data Reporting
 
 * All data should be published by the driver as it is reported by the device. Any modifications to the data (e.g. filtering, transformations) should be delegated to a downstream consumer of the data [2]_ [3]_.
 
-* The major exception to the above is if any data is reported left handed - it may be converted to right handed by the driver by inverting the `y` axis.
+  - The first exception to the above is if any data is reported inconsistently with the manufacturer's specified body frame for the device. In this case, the driver should transform as necessary to keep the reference frame consistent across all data sources.
+
+  - The second exception to the above is if any data is reported left handed - it may be converted to right handed by the driver by inverting the `y` axis.
 
 * A prominent note should be made in the driver documentation regarding any internal data manipulation that does not comply with the device manufacturer's specification.
 
@@ -43,26 +45,34 @@ Raw Data
 
 * Accelerometers
 
-- The accelerometers report linear acceleration data in the body frame of the device. The data takes the form of a 3D vector, with the components representing the deflection of the internal accelerometers. 
-- When the device is at rest, the vector will represent the deflection solely due to gravity, and will always point 'up' away from the earth's gravitational center.
-- The direction of the vector in the neutral orientation will depend on the z-axis orientation of the IMU's world frame.
+  - The accelerometers report linear acceleration data in the body frame of the device. The data takes the form of a 3D vector, with the components representing the deflection of the internal accelerometers. 
+
+  - When the device is at rest, the vector will represent the deflection solely due to gravity, and will always point 'up' away from the earth's gravitational center.
+
+  - The direction of the vector in the neutral orientation will depend on the z-axis orientation of the IMU's world frame.
+
 
 * Gyroscopes
 
-- The gyroscopes report rotational velocity data in the body frame of the device. The data takes the form of a 3D vector, with the components representing velocity around each equivalent axis of the body frame.
-- The rotational velocity is right handed with respect to the axis, and independent of the orientation of the device.
+  - The gyroscopes report rotational velocity data in the body frame of the device. The data takes the form of a 3D vector, with the components representing velocity around each equivalent axis of the body frame.
+
+  - The rotational velocity is right handed with respect to the axis, and independent of the orientation of the device.
+
 
 * Magnetometers
+  
 
-- The magnetometers report magnetic field strength in the body frame of the device. The data takes the form of a 3D vector, with the components representing magnetic field strength in each direction.
+  - The magnetometers report magnetic field strength in the body frame of the device. The data takes the form of a 3D vector, with the components representing magnetic field strength in each direction.
+
 
 Filtered Data
 '''''''''''''
 
 * Orientation
+  
+  - The IMU driver implementation may provide a filtered orientation estimate based on a combination of the above sensor sources. This data is in the form of a quaternion, which represents the rotation of the body frame relative to the world frame.
 
-- The IMU driver implementation may provide a filtered orientation estimate based on a combination of the above sensor sources. This data is in the form of a quaternion, which represents the rotation of the body frame relative to the world frame.
-- In the neutral orientation, the body frame is aligned with the world frame, so the orientation will be the identity quaternion.
+  - In the neutral orientation, the body frame is aligned with the world frame, so the orientation will be the identity quaternion.
 
 
 Transformation
@@ -81,19 +91,23 @@ Primary
 All primary message types provide a covariance matrix (see REP 103 [1]_) alongside the data field (`*_covariance`). Unreported data dimensions should specify a diagonal covariance of `-1`.
 
 * `imu/data_raw` (sensor_msgs/Imu)
-- Sensor output grouping accelerometer (`linear_acceleration`) and gyroscope (`angular_velocity`) data. 
+
+  - Sensor output grouping accelerometer (`linear_acceleration`) and gyroscope (`angular_velocity`) data. 
 
 * `imu/data` (sensor_msgs/Imu)
-- Same as `imu/data_raw`, with an included quaternion orientation estimate (`orientation`).
+
+  - Same as `imu/data_raw`, with an included quaternion orientation estimate (`orientation`).
 
 * `imu/mag` (sensor_msgs/MagneticField)
-- Sensor output containing magnetometer data.
+
+  - Sensor output containing magnetometer data.
 
 Secondary
 '''''''''
 
 * `imu/rpy` (geometry_msgs/Vector3Stamped)
-- Supplementary orientation estimate converted to fixed-axis RPY form.
+
+  - Supplementary orientation estimate converted to fixed-axis RPY form.
 
 Frame Id
 ''''''''
@@ -104,7 +118,7 @@ The coordinate frame (`frame_id`) for all the above topics represents the IMU's 
 Namespacing
 -----------
 
-By convention, IMU output topics are pushed down to a local namespace. The primary source of IMU data for a system is published in the `imu` namespace. Additional sources, such as secondary IMU type sensors or preprocessed data should be published in alternative `imu_*` namespaces. IMU driver implementations should take care to allow convenient remapping of the local namespace through a single remap argument (e.g. imu:=imu_raw), rather than separate remap calls for each topic.
+By convention, IMU output topics are pushed down to a local namespace. The primary source of IMU data for a system is published in the `imu` namespace. Additional sources, such as secondary IMUs or raw data should be published in alternative `imu_...` namespaces. IMU driver implementations should take care to allow convenient remapping of the local namespace through a single remap argument (e.g. imu:=imu_raw), rather than separate remap calls for each topic.
 
 Rationale
 =========
@@ -119,7 +133,7 @@ It is up to the maintainer of a driver to determine if the driver should be upda
 Reference Implementation
 ========================
 
-A reference implementation for this REP is in development for the CHR-UM6 IMU [4]_, targeting ROS Jade.
+A reference implementation for this REP is in development for the CHR-UM6 IMU [4]_ driver, targeting ROS Jade.
 
 References
 ==========
