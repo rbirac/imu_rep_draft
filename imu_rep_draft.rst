@@ -1,7 +1,7 @@
 REP: XXX
 Title: Standard Topics and Conventions for IMUs
 Author: Paul Bovbel <pbovbel@clearpathrobotics.com>
-Status: Active
+Status: Draft
 Type: Informational
 Content-Type: text/x-rst
 Created: 02-Feb-2015
@@ -11,218 +11,135 @@ Post-History: 02-Feb-2015
 Abstract
 ========
 
-This REP defines common topics, namespaces, and data output conventions for sensors in the Inertial Measurement Unit (IMU) family. This includes accelerometers, gyroscopes, magnetomers, and any combination thereof.
+This REP defines common topics, namespaces, and data output conventions for data provider (drivers) of sensors in the Inertial Measurement Unit (IMU) family. This includes accelerometers, gyroscopes, magnetomers, and any combination thereof.
 
 Specification
-=============
+============
 
-Topics
-----------
-
-The following topics are expected to be common to many devices.  Note that some of these topics are published by support libraries.
-
-Required for Single Echo LaserScanners
-'''''''''''''''''''''''''''''''''''''''
-
-* scan
-
-  - Traditional single return output. (sensor_msgs/LaserScan)
-
-    This is the most compatible topic and represents output from a laser scanner that 
-    is not providing multiple returns per beam.  This topic is not present for multi-echo laserscanners in multi-echo modes.
-
-Required for Multiecho LaserScanners
-''''''''''''''''''''''''''''''''''''
-
-* echoes
-
-  - Output of a laser scanner capable of multiple returns per beam.  
-    (sensor_msgs/MultiEchoLaserScan)
-
-    This is the topic that is designed to give the most information to users of LaserScans.  
-    sensor_msgs/MultiEchoLaserScan is not required to be used by clients.  This topic is not 
-    present for single echo laserscanners or multi-echo laserscanners in single echo mode.
-
-Optional Topics for Backwards Compatibility
-'''''''''''''''''''''''''''''''''''''''''''
-
-To provide compatibility with libraries that do not support sensor_msgs/MultiEchoLaserScan, the following optional topics are defined.  They are typically published by a support library, nodelet, or node.  The driver can directly publish onto these topics if the modes are supported in hardware as a primary method of data acquisition.
-
-* first
-
-  - Output of the first return from a multi echo laser scanner. (sensor_msgs/LaserScan)
-
-    This topic represents the first return (distance closest to the laser scanner).  It is typically 
-    published by a support library that converts sensor_msgs/MultiEchoLaserScans into 
-    sensor_msgs/LaserScans.
-
-* last
-
-  - Output of the last return from a multi echo laser scanner. (sensor_msgs/LaserScan)
-
-    This topic represents the last return (distance furthest from the laser scanner).  It is typically 
-    published by a support library that converts sensor_msgs/MultiEchoLaserScans into 
-    sensor_msgs/LaserScans.
-
-* most_intense
-
-  - Output of the most intense return from a multi echo laser scanner. (sensor_msgs/LaserScan)
-
-    This topic represents the most intense return (brightest value).  It is typically published by a 
-    support library that converts sensor_msgs/MultiEchoLaserScans into 
-    sensor_msgs/LaserScans.
-
-Parameters
-----------
-
-Devices should access as many of these parameters as are relevant.  For example, older devices connect via serial while newer often connect over ethernet.  In this case, newer devices would use ip_address/ip_port, while older devices would use serial_port/serial_baud.  If a parameter is not supported by hardware, it is not necessary to read/write to that parameter.
-
-* ~ip_address (string)
-
-  - Location of the device on the network (only valid for ethernet devices).
-
-* ~ip_port (int)
-
-  - IP port number. (1 to 65535)
-
-* ~serial_port (string)
-
-  - This represents the serial port device (COM4, /dev/tty/USB0).
-
-* ~serial_baud (int)
-
-  - Data transfer rate for a serial device (9600, 115200, and so on)
-
-* ~frame_id (string)
-
-  - The frame in which laser scans will be returned. This frame should be at the optical center of  
-    the laser, with the x-axis along the zero degree ray, and the y-axis along the 90 degree ray.
-
-* ~calibrate_time (boolean)
-
-  - Whether the node should calibrate the device's time offset on startup. If true, the node will    
-    exchange of series of messages with the device in order to determine the time delay in the 
-    connection. This calibration step is necessary to produce accurate timestamps on scans.
-
-* ~time_offset (double)
-
-  - A manually calibrated offset (in seconds) to add to the timestamp before publication of a message.
-
-* ~publish_intensity (boolean)
-
-  - If true, the laser will publish intensity.  If false, the laser will not publish intensity to save bandwidth.  Should be implemented in hardware if possible, but otherwise may be implemented in software.
-
-* ~publish_multiecho (boolean)
-
-  - If true, a multiecho laserscanner will publish sensor_msgs/MultiEchoLaserScan.  If false, the laser will publish sensor_msgs/LaserScan.  (If supported by the hardware; otherwise, please use a support library to convert MultiEchoLaserScans to LaserScans.)  This parameter is only valid for multiecho laserscanners.
-
-* ~angle_min (double)
-
-  - Controls the angle of the first range measurement in radians.  (If supported by the hardware; it 
-    is not recommended to implement this feature in software.)
-
-* ~angle_max (double)
-
-  - Controls the angle of the last range measurement in radians.  (If supported by the hardware; it 
-    is not recommended to implement this feature in software.)
-
-* ~cluster (int)
-
-  - The number of adjacent range measurements to cluster into a single reading; the shortest reading 
-    from the cluster is reported.  (If supported by the hardware; it is not recommended to implement 
-    this feature in software.)
-
-* ~skip (int)
-
-  - The number of input messages to skip between each output message.  The device will publish 1    
-    message for every N skipped messages.  Example: if skip is set to '2', the device will publish 1 
-    message and then 'drop' the following 2 message - a 66.7% reduction in output rate.  (If 
-    supported by the hardware; it is not recommended to implement this feature in software.)
-
-Diagnostic Keys
+Frame Conventions
 ---------------
 
-Devices should publish as many of the following keys that are easy to assume or read from hardware.  These key/value pairs are common among devices of this type.  This list is not considered to be exhaustive and drivers are encouraged to add key/value pairs specific to the hardware.
+An IMU device measures data with respect to two frames:
 
-* "IP Address"
+* The **body frame** represents the internal device axes. These are typically specified by the manufacturer, and may be found either in the device specification documents, and sometimes printed directly on the device body. This frame is fixed to the device orientation.
 
-  - Location of the device on the network ex (192.168.1.10) (only valid for ethernet devices).
+* The **world frame** represents the external reference frame for the device. This frame is typically defined as ENU (east north up) or NED (north east down) by the device manufacturer, and the relevant conventions from REP 103 [1]_ apply.
 
-* "IP Port"
+The device has an associated *neutral orientation*, defined as the orientation of the device where the body and the world frame align [2]_.
 
-  - IP port number. ex (1 to 65535) (only valid for ethernet devices)
+Data Reporting
+--------------
 
-* "Serial Port"
+* To maintain interoperability with ROS conventions, all frames must be right handed.
 
-  - This represents the serial port device ex (COM4, /dev/tty/USB0).
+* All data should be published by the driver as it is reported by the device. Any modifications to the data (e.g. filtering, transformations) should be delegated to a downstream consumer of the data [2]_ [3]_.
 
-* "Serial Baud"
+* The major exception to the above is if any data is reported left handed - it may be converted to right handed by the driver by inverting the `y` axis.
 
-  - Data transfer rate for a serial device ex (9600, 115200)
+* A prominent note should be made in the driver documentation regarding any internal data manipulation that does not comply with the device manufacturer's specification.
 
-* "Vendor Name"
+Raw Data
+''''''''
 
-  - Name of the device vendor. ex (Hokuyo Automatic Co, Ltd)
+* Accelerometers
 
-* "Product Name"
+- The accelerometers report linear acceleration data in the body frame of the device. The data takes the form of a 3D vector, with the components representing the deflection of the internal accelerometers. 
+- When the device is at rest, the vector will represent the deflection solely due to gravity, and will always point 'up' away from the earth's gravitational center.
+- The direction of the vector in the neutral orientation will depend on the z-axis orientation of the IMU's world frame.
 
-  - Name of the product or model. ex (UTM-30LX-EW)
+* Gyroscopes
 
-* "Firmware Version"
+- The gyroscopes report rotational velocity data in the body frame of the device. The data takes the form of a 3D vector, with the components representing velocity around each equivalent axis of the body frame.
+- The rotational velocity is right handed with respect to the axis, and independent of the orientation of the device.
 
-  - Description of the current Firmware version if the hardware has programmable features.
-    ex (3.3.01)
+* Magnetometers
 
-* "Firmware Date"
+- The magnetometers report magnetic field strength in the body frame of the device. The data takes the form of a 3D vector, with the components representing magnetic field strength in each direction.
 
-  - Date that the last Firmware version was compiled. ex (23 June 2008)
+Filtered Data
+'''''''''''''
 
-* "Protocol Version"
+* Orientation
 
-  - Description of the communication protocol used.  ex (SCIP 2.0), (LMS COLA-B UDP)
+- The IMU driver implementation may provide a filtered orientation estimate based on a combination of the above sensor sources. This data is in the form of a quaternion, which represents the rotation of the body frame relative to the world frame.
+- In the neutral orientation, the body frame is aligned with the world frame, so the orientation will be the identity quaternion.
 
-* "Device ID"
 
-  - Serial number or other unique identifier ex (H0906091).'
+Transformation
+--------------
 
-* "Computed Latency"
+Applying a transformation to IMU data requires applying an identical rotation to both the body and the world frames - this implies that no offset will be applied to any world-referenced data (accelerometers, magnetometers and, orientation). In essence, transformed data represents the output of a simulated IMU with the updated body and world frames, and the effect is that NED and ENU IMU data can be easily obtained from the same data source by transforming between the two world frames, regardless of the manufacturer's specification.
 
-  - Offset added to header timestamp to reflect latency in data stream.  ex (-0.013 s)
+Topics
+------
 
-* "User Time Offset"
+The following topics are expected to be common to many devices. An IMU device driver is expected to publish at least one primary topic. Note that some of these topics may be published by support libraries, rather than the driver implementation. All below message types are supplemented with a std_msgs/Header, containing time and coordinate frame information.
 
-  - Offset added to the header timestamp from the parameter '~time_offset'.  ex (-0.551 s)
+Primary
+'''''''
+
+All primary message types provide a covariance matrix (see REP 103 [1]_) alongside the data field (`*_covariance`). Unreported data dimensions should specify a diagonal covariance of `-1`.
+
+* `imu/data_raw` (sensor_msgs/Imu)
+- Sensor output grouping accelerometer (`linear_acceleration`) and gyroscope (`angular_velocity`) data. 
+
+* `imu/data` (sensor_msgs/Imu)
+- Same as `imu/data_raw`, with an included quaternion orientation estimate (`orientation`).
+
+* `imu/mag` (sensor_msgs/MagneticField)
+- Sensor output containing magnetometer data.
+
+Secondary
+'''''''''
+
+* `imu/rpy` (geometry_msgs/Vector3Stamped)
+- Supplementary orientation estimate converted to fixed-axis RPY form.
+
+Frame Id
+''''''''
+
+The coordinate frame (`frame_id`) for all the above topics represents the IMU's body frame. The transform between the body frame and other frames represents the IMU body frame's current orientation. The default frame ID for IMUs is `imu_link`. In compliance with REP 0103 [1]_, and as a hint to integrators, the default frame name for IMUs that report in NED should be `imu_link_ned`.
+
+
+Namespacing
+-----------
+
+By convention, IMU output topics are pushed down to a local namespace. The primary source of IMU data for a system is published in the `imu` namespace. Additional sources, such as secondary IMU type sensors or preprocessed data should be published in alternative `imu_*` namespaces. IMU driver implementations should take care to allow convenient remapping of the local namespace through a single remap argument (e.g. imu:=imu_raw), rather than separate remap calls for each topic.
 
 Rationale
 =========
 
-ROS is built on common messages as interfaces to data.  These messages allow software written without the other's knowledge to work together the first time and produce valid output.  In much the same way as these common messages provide consistent software interfaces, this REP provides a consistent user interface to drivers.
-
-The common topics provide easy to connect nodes via launch files between drivers and processing software. Common parameters provide a way to easily reuse configurations between different devices when applicable.  Finally, common topics, parameters, and diagnostic keys provide a consistent user experience between drivers.
-
-The common names also provide a consistent and documented source of names and diagnostics - freeing the author to make better defined software that's more easily validated.
+This REP seeks to mitigate the variances in manufacturer specification and ROS driver development with regards to IMUs. Following these guidelines to data formatting and representation will aid in creating a consistent interface to the majority of IMU sensors, and avoid the inconvenience of updating ROS message definitions [2]_.
 
 Backwards Compatibility
 =======================
 
 It is up to the maintainer of a driver to determine if the driver should be updated to follow this REP.  If a maintainer chooses to update the driver, the current usage should at minimum follow a tick tock pattern where the old usage is deprecated and warns the user, followed by removal of the old usage.  The maintainer may choose to support both standard and custom usage, as well as extend this usage or implement this usage partially depending on the specifics of the driver.
 
-+References
-+==========
-+
-+.. [1] ros-users discussion
-+   (https://code.ros.org/lurker/message/20130225.194132.55d7a174.en.html)
-+
-+.. [2] Github discussion
-+   (https://github.com/ros-infrastructure/rep/pull/25)
-+
+Reference Implementation
+========================
+
+A reference implementation for this REP is in development for the CHR-UM6 IMU [4]_, targeting ROS Jade.
+
+References
+==========
+
+.. [1] REP-0103 Standard Units of Measure and Coordinate Conventions
+   (http://www.ros.org/reps/rep-0103.html)
+
+.. [2] ros-sig-drivers discussion
+   (https://groups.google.com/forum/#!topic/ros-sig-drivers/Fb4cxdRqjlU)
+
+.. [3] ROS Answers discussion
+   (http://answers.ros.org/question/200480/imu-message-definition/)
+
+.. [4] ROS Driver for CHR-UM6
+   (http://wiki.ros.org/um6)
 
 Copyright
 =========
 
 This document has been placed in the public domain.
-
-
 
 ..
    Local Variables:
