@@ -17,24 +17,30 @@ Specification
 ============
 
 Frame Conventions
----------------
+-----------------
 
 An IMU device measures data with respect to two frames, specified by the manufacturer:
 
-* The **world frame** represents the external reference frame for the device. This frame is typically aligned either ENU (east north up) or NED (north east down), and the relevant conventions from REP 103 [1]_ apply.
-
 * The **body frame** represents the internal device axes. These may be found either in the device specification documents, and sometimes printed directly on the device body. This frame is fixed to the device orientation.
   
-  - If the device does not have an absolute yaw reference (magnetometer), the world frame is only aligned with an external reference along the `z` axis. The `x` and `y` axes are aligned relative to the power-on position of the sensor.
+* The **world frame** represents the external reference frame for the device. This frame is typically aligned either ENU (east north up) or NED (north east down), and the relevant conventions from REP 103 [1]_ apply.
 
-  - The device has an associated *neutral orientation*, defined as the orientation of the device where the body and the world frame align [2]_.
+* If the device does not have an absolute yaw reference (magnetometer), the world frame is only aligned with an external reference along the `z` axis. The `x` and `y` axes are aligned relative to the power-on position of the sensor.
+
+* The `frame_id` for all message types published by an IMU represents the body frame - the default frame ID for IMUs is `imu_link`. In compliance with REP 0103 [1]_, and as a hint to integrators, the default frame name for IMUs that report in NED should be `imu_link_ned`.
+
+  - The configuration of the body frame relative to other frames (e.g. `base_link`) represents the mounting position of the IMU [2]_.
+
+  - The world frame definition is implied in the configuration of the body frame, and is not explicitly defined in the transform tree.
+
+* The device has an associated *neutral orientation*, defined as the orientation of the device where the body and the world frame align [3]_.
 
 Data Reporting
 --------------
 
 * To maintain interoperability with ROS conventions, all frames must be right handed.
 
-* All data should be published by the driver as it is reported by the device. Any modifications to the data (e.g. filtering, transformations) should be delegated to a downstream consumer of the data [2]_ [3]_.
+* All data should be published by the driver as it is reported by the device. Any modifications to the data (e.g. filtering, transformations) should be delegated to a downstream consumer of the data [3]_.
 
   - The first exception to the above is if any data is reported inconsistently with the manufacturer's specified body frame for the device. In this case, the driver should transform as necessary to keep the reference frame consistent across all data sources.
 
@@ -108,12 +114,6 @@ Secondary
 
   - Supplementary orientation estimate converted to fixed-axis RPY form.
 
-Frame Id
-''''''''
-
-The coordinate frame (`frame_id`) for all the above topics represents the IMU's body frame. The transform between the body frame and other frames represents the IMU body frame's current orientation. The default frame ID for IMUs is `imu_link`. In compliance with REP 0103 [1]_, and as a hint to integrators, the default frame name for IMUs that report in NED should be `imu_link_ned`.
-
-
 Namespacing
 -----------
 
@@ -122,7 +122,7 @@ By convention, IMU output topics are pushed down to a local namespace. The prima
 Rationale
 =========
 
-This REP seeks to mitigate the variances in manufacturer specification and ROS driver development with regards to IMUs. Following these guidelines to data formatting and representation will aid in creating a consistent interface to the majority of IMU sensors, and avoid the inconvenience of updating ROS message definitions [2]_.
+This REP seeks to mitigate the variances in manufacturer specification and ROS driver development with regards to IMUs. Following these guidelines to data formatting and representation will aid in creating a consistent interface to the majority of IMU sensors, and avoid the inconvenience of updating ROS message definitions [3]_.
 
 Backwards Compatibility
 =======================
@@ -140,11 +140,11 @@ References
 .. [1] REP-0103 Standard Units of Measure and Coordinate Conventions
    (http://www.ros.org/reps/rep-0103.html)
 
-.. [2] ros-sig-drivers discussion
-   (https://groups.google.com/forum/#!topic/ros-sig-drivers/Fb4cxdRqjlU)
+.. [2] ROS Answers discussion
+   (http://answers.ros.org/question/50870/what-frame-is-sensor_msgsimuorientation-relative-to/)
 
-.. [3] ROS Answers discussion
-   (http://answers.ros.org/question/200480/imu-message-definition/)
+.. [3] ros-sig-drivers discussion
+   (https://groups.google.com/forum/#!topic/ros-sig-drivers/Fb4cxdRqjlU)
 
 .. [4] ROS Driver for CHR-UM6
    (http://wiki.ros.org/um6)
