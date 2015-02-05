@@ -88,12 +88,7 @@ Applying a transformation to IMU data requires applying an identical rotation to
 Topics
 ------
 
-The following topics are expected to be common to many devices. An IMU device driver is expected to publish at least one primary topic. Note that some of these topics may be published by support libraries, rather than the driver implementation. All below message types are supplemented with a std_msgs/Header, containing time and coordinate frame information.
-
-Primary
-'''''''
-
-All primary message types provide a covariance matrix (see REP 103 [1]_) alongside the data field (`*_covariance`). Unreported data dimensions should specify a diagonal covariance of `-1`.
+The following topics are expected to be common to many devices - an IMU device driver is expected to publish at least one. Note that some of these topics may be also published by support libraries, rather than the base driver implementation. All below message types are supplemented with a std_msgs/Header, containing time and coordinate frame information.
 
 * `imu/data_raw` (sensor_msgs/Imu)
 
@@ -107,12 +102,7 @@ All primary message types provide a covariance matrix (see REP 103 [1]_) alongsi
 
   - Sensor output containing magnetometer data.
 
-Secondary
-'''''''''
-
-* `imu/rpy` (geometry_msgs/Vector3Stamped)
-
-  - Supplementary orientation estimate converted to fixed-axis RPY form.
+All message types provide a covariance matrix (see REP 103 [1]_) alongside the data field (`*_covariance`). Unreported data dimensions should specify a diagonal covariance of `-1`.
 
 Namespacing
 -----------
