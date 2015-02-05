@@ -109,7 +109,7 @@ The following topics are expected to be common to many devices - an IMU device d
 All message types provide a covariance matrix (see REP 103 [1]_) alongside the data field (`*_covariance`). If the data's covariance is unknown, the all elements of the covariance matrix should be set to 0. If a data field is unreported, the first element (`0`) of the covariance matrix should be set to `-1`.
 
 Namespacing
------------
+'''''''''''
 
 By convention, IMU output topics are pushed down to a local namespace. The primary source of IMU data for a system is published in the `imu` namespace. Additional sources, such as secondary IMUs or unprocessed raw data should be published in alternative `imu_...` local namespaces. IMU driver implementations should take care to allow convenient remapping of the local namespace through a single remap argument (e.g. imu:=imu_raw), rather than separate remap calls for each topic.
 
