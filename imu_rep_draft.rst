@@ -27,6 +27,8 @@ An IMU device measures data with respect to two frames, specified by the manufac
 
 * If the device does not have an absolute yaw reference (magnetometer), the world frame is only aligned with an external reference along the `z` axis. The `x` and `y` axes are aligned relative to the power-on position of the sensor.
 
+* If the device does not have an absolute gravity reference (accelerometer), the world frame is not aligned to any external reference and instead aligned relative to the power-on position of the sensor.
+
 * The `frame_id` for all message types published by an IMU represents the body frame - the default frame ID for IMUs is `imu_link`. In compliance with REP 0103 [1]_, and as a hint to integrators, the default frame name for IMUs that report in NED should be `imu_link_ned`.
 
   - The configuration of the body frame relative to other frames (e.g. `base_link`) represents the mounting position of the IMU [2]_.
