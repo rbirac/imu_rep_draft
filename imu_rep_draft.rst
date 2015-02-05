@@ -90,6 +90,7 @@ Topics
 
 The following topics are expected to be common to many devices - an IMU device driver is expected to publish at least one. Note that some of these topics may be also published by support libraries, rather than the base driver implementation. All below message types are supplemented with a std_msgs/Header, containing time and coordinate frame information.
 
+
 * `imu/data_raw` (sensor_msgs/Imu)
 
   - Sensor output grouping accelerometer (`linear_acceleration`) and gyroscope (`angular_velocity`) data. 
@@ -101,6 +102,7 @@ The following topics are expected to be common to many devices - an IMU device d
 * `imu/mag` (sensor_msgs/MagneticField)
 
   - Sensor output containing magnetometer data.
+
 
 All message types provide a covariance matrix (see REP 103 [1]_) alongside the data field (`*_covariance`). Unreported data dimensions should specify a diagonal covariance of `-1`.
 
