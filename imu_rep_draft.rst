@@ -1,5 +1,5 @@
 REP: XXX
-Title: Standard Topics and Conventions for IMUs
+Title: Standard Conventions for IMU Sensor Drivers
 Author: Paul Bovbel <pbovbel@clearpathrobotics.com>
 Status: Draft
 Type: Informational
@@ -57,21 +57,19 @@ Raw Data
 
 * Accelerometers
 
-  - The accelerometers report linear acceleration data in the body frame of the device. The data takes the form of a 3D vector, with the components representing the deflection of the internal accelerometers.
+  - The accelerometers report linear acceleration data in the body frame of the device. This data is output from the driver as a 3D vector, with the components representing the deflection of the internal accelerometers.
 
   - When the device is at rest, the vector will represent the deflection solely due to gravity, and will always point 'up' away from the earth's gravitational center.
 
 * Gyroscopes
 
-  - The gyroscopes report rotational velocity data in the body frame of the device. The data takes the form of a 3D vector, with the components representing velocity around each equivalent axis of the body frame.
+  - The gyroscopes report rotational velocity data in the body frame of the device. This data is output from the driver as a 3D vector, with the components representing the instantaneous velocity around each equivalent axis of the body frame.
 
   - The rotational velocity is right handed with respect to the bode axes, and independent of the orientation of the device.
 
-
 * Magnetometers
 
-
-  - The magnetometers report magnetic field strength in the body frame of the device. The data takes the form of a 3D vector, with the components representing magnetic field strength in each direction.
+  - The magnetometers report magnetic field strength in the body frame of the device. This data is output from the driver as a 3D vector, with the components representing magnetic field strength in each direction.
 
 
 Filtered Data
@@ -79,7 +77,7 @@ Filtered Data
 
 * Orientation
 
-  - The IMU sensor may provide a fused orientation estimate. This data is in the form of a quaternion, which represents the orientation of the body frame in the world frame.
+  - The IMU sensor may provide a fused orientation estimate. This data is output from the driver in the form of a quaternion, which represents the orientation of the body frame in the world frame.
 
   - In the neutral orientation, the body frame is aligned with the world frame, so the orientation will be the identity quaternion.
 
