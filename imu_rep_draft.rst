@@ -108,7 +108,7 @@ The following topics are expected to be common to many devices - an IMU device d
   - Sensor output containing magnetometer data.
 
 
-All message types provide a covariance matrix (see REP 103 [1]_) alongside the data field (`*_covariance`). If the data's covariance is unknown, all elements of the covariance matrix should be set to 0, unless overriden by a paremeter. If a data field is unreported, the first element (`0`) of the covariance matrix should be set to `-1`.
+All message types provide a covariance matrix (see REP 103 [1]_) alongside the data field (`*_covariance`). If the data's covariance is unknown, all elements of the covariance matrix should be set to 0, unless overriden by a parameter. If a data field is unreported, the first element (`0`) of the covariance matrix should be set to `-1`.
 
 Namespacing
 '''''''''''
