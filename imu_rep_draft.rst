@@ -128,7 +128,7 @@ IMU driver implementations should read as many of these parameters as are releva
 
   - Represents the baud rate of the serial link.
 
-* `~frame_id` (`string`, default: `imu_link`)
+* `~frame_id` (`string`, default: `imu_link` or `imu_link_ned`)
 
   - The frame ID to set in outgoing messages.
 
